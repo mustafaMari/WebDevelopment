@@ -121,7 +121,7 @@
 
 </style>
 <script>
-  function begin() {
+  function begin(o, properties) {
     function httpGet(theUrl) {
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.open("GET", theUrl, false); // false for synchronous request
@@ -130,7 +130,28 @@
     }
 
     let data = httpGet("https://optad360.mgr.consensu.org/cmp/v2/vendor-list.json")
+    let akond = JSON.parse(data)
     data = JSON.parse(data).vendors;
+    Object.keys(akond).forEach((key) => {
+      let x = key.toLowerCase().replaceAll(/[^a-zA-Z]/g, "");
+      akond = renameKey(akond, key, x)
+    });
+    let updated = JSON.stringify(akond)
+    console.log("updated: " + updated)
+    const clone = (obj) => Object.assign({}, obj);
+    const renameKey = (object, key, newKey) => {
+
+      const clonedObj = clone(object);
+
+      const targetKey = clonedObj[key];
+
+      delete clonedObj[key];
+
+      clonedObj[newKey] = targetKey;
+
+      return clonedObj;
+
+    };
 
     const extract = () => {
       Object.keys(data).forEach((key) => {
@@ -192,6 +213,7 @@
     let expires = "expires=" + d.toUTCString()
     document.cookie = "privacy_policy=" + data + ";" + expires + ";path=/"
   }
+
   if (document.cookie.length === 0) {
     begin()
   } else {
